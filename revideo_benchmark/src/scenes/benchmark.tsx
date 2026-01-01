@@ -1,4 +1,4 @@
-import {Rect, makeScene2D} from '@motion-canvas/2d';
+import {Rect, makeScene2D} from '@revideo/2d';
 import {
   all,
   createRefArray,
@@ -8,13 +8,13 @@ import {
   loop,
   tween,
   useTime,
-} from '@motion-canvas/core';
+} from '@revideo/core';
 
 const ROWS = 6;
 const MAX_X = 600;
 const ROW_SPACING = 140;
 const CYCLE_SECONDS = 2;
-const TOTAL_SECONDS = 120;
+const TOTAL_SECONDS = 120
 const CYCLES = TOTAL_SECONDS / CYCLE_SECONDS;
 const COLORS = [
   '#22d3ee',
@@ -37,7 +37,7 @@ const springEase = (t: number) => {
   return clamp01(value);
 };
 
-export default makeScene2D(function* (view) {
+export default makeScene2D('benchmark', function* (view) {
   const rows = createRefArray<Rect>();
 
   const startY = -((ROWS - 1) * ROW_SPACING) / 2;
@@ -106,6 +106,9 @@ export default makeScene2D(function* (view) {
     );
   });
 });
+
+
+
 
 
 

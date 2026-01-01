@@ -1,0 +1,24 @@
+{
+  "name": "revideo_benchmark",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "render": "node ./scripts/render.mjs"
+  },
+  "dependencies": {
+    "@revideo/2d": "^0.10.4",
+    "@revideo/core": "^0.10.4",
+    "@revideo/renderer": "^0.10.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.2",
+    "@revideo/ui": "^0.10.4",
+    "@revideo/vite-plugin": "^0.10.4",
+    "preact": "^10.28.1",
+    "typescript": "^5.5.4",
+    "vite": "^4.5.14"
+  }
+}

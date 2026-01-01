@@ -1,18 +1,25 @@
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$repoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$renderDir = Join-Path $repoRoot "render"
 $mode = if ($args.Count -gt 0) { $args[0].ToLowerInvariant() } else { "fast" }
 $cpuCount = [int]$env:NUMBER_OF_PROCESSORS
 $cpuCount = if ($cpuCount -gt 0) { $cpuCount } else { 1 }
 $workersFast = [Math]::Max($cpuCount, 1)
 $workersDefault = [Math]::Max([int][Math]::Floor($cpuCount / 2), 1)
 
+$fps = 60
+$durationSeconds = [double]$env:BENCH_DURATION_SECONDS
+if (-not [double]::IsFinite($durationSeconds) -or $durationSeconds -le 0) {
+  $durationSeconds = 120
+}
+$durationFrames = [int]([Math]::Round($fps * $durationSeconds))
+
 $renderArgs = if ($mode -eq "default") {
-  "1920:1080:60:3600:${workersDefault}:H264:medium"
+  "1920:1080:${fps}:${durationFrames}:${workersDefault}:H264:medium"
 } else {
-  "1920:1080:60:3600:${workersFast}:H264:ultrafast"
+  "1920:1080:${fps}:${durationFrames}:${workersFast}:H264:ultrafast"
 }
 
 $env:RENDER_DEV_SERVER_URL = "http://localhost:5174/render"
-$env:RENDER_OUTPUT_PATH = "$root\\renders\\framescript.mp4"
 $env:RENDER_PROGRESS_URL = "http://127.0.0.1:3000/render_progress"
 $env:RENDER_CANCEL_URL = "http://127.0.0.1:3000/is_canceled"
 $env:RENDER_RESET_URL = "http://127.0.0.1:3000/reset"
@@ -33,6 +40,12 @@ if (-not $ready) {
 
 Write-Host "Mode: $mode"
 Write-Host "Render args: $renderArgs"
-Measure-Command {
-  cargo run --release --manifest-path "$root\\framescript_benchmark\\render\\Cargo.toml" -- $renderArgs
-} | Select-Object TotalSeconds
+
+Push-Location $renderDir
+try {
+  Measure-Command {
+    cargo run --release -- $renderArgs
+  } | Select-Object TotalSeconds
+} finally {
+  Pop-Location
+}

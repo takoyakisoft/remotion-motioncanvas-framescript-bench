@@ -1,24 +1,21 @@
-# Benchmark: Remotion / Motion Canvas / FrameScript (60s, nonlinear)
+# Benchmark: Remotion / Motion Canvas / FrameScript / Revideo (60s and 120s, nonlinear)
 
-All three projects are configured for a 60s, 60fps render with continuous easeIn/easeOut/easeInOut/sin/cos/spring motion.
+All four projects are configured for 60fps renders with continuous easeIn/easeOut/easeInOut/sin/cos/spring motion.
+Measurements were taken at 60s and 120s (120s is the current default).
 
 ## Remotion
 
-PowerShell:
+PowerShell (60s/120s are controlled by the project default; 10s samples use frames override):
 
 ```powershell
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$out = Join-Path $root "renders"
-New-Item -ItemType Directory -Force $out | Out-Null
+# 120s default render
+.\scripts\render_remotion_default.ps1
 
-Measure-Command {
-  pnpm -C "$root\remotion_benchmark" exec remotion render src/index.ts Benchmark "$out\remotion.mp4" `
-    --concurrency=100% `
-    --codec=h264 `
-    --crf=23 `
-    --image-format=jpeg `
-    --hardware-acceleration=if-possible
-} | Select-Object TotalSeconds
+# 120s fast render
+.\scripts\render_remotion_fast.ps1
+
+# 10s sample render
+.\scripts\render_remotion_default_10s.ps1
 ```
 
 ## Motion Canvas
@@ -26,13 +23,12 @@ Measure-Command {
 This project uses the editor to trigger the FFmpeg exporter (no CLI in this setup).
 
 ```powershell
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
-pnpm -C "$root\motioncanvas_benchmark" start
+pnpm -C .\motioncanvas_benchmark dev
 ```
 
 In the editor:
 - Open the project and use the default scene.
-- Render with ?Video (FFmpeg)? exporter (already set in `motioncanvas_benchmark/src/project.meta`).
+- Render with the Video (FFmpeg) exporter.
 - FPS = 60, Scale = 1, Range = full scene.
 - Measure elapsed time with a stopwatch from Render start to completion.
 
@@ -43,30 +39,31 @@ PowerShell (two terminals):
 Terminal A (render page server):
 
 ```powershell
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
-pnpm -C "$root\framescript_benchmark" dev:render
+pnpm -C .\framescript_benchmark dev:render
 ```
 
 Terminal B (renderer):
 
 ```powershell
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$out = Join-Path $root "renders"
-New-Item -ItemType Directory -Force $out | Out-Null
+# 120s default
+.\scripts\render_framescript_default.ps1
 
-$env:RENDER_DEV_SERVER_URL = "http://localhost:5174/render"
-$env:RENDER_OUTPUT_PATH = "$out\framescript.mp4"
-$env:RENDER_PROGRESS_URL = "http://127.0.0.1:3000/render_progress"
-$env:RENDER_CANCEL_URL = "http://127.0.0.1:3000/is_canceled"
-$env:RENDER_RESET_URL = "http://127.0.0.1:3000/reset"
-$env:RENDER_AUDIO_PLAN_URL = "http://127.0.0.1:3000/render_audio_plan"
+# 120s fast
+.\scripts\render_framescript_fast.ps1
 
-$workers = [Math]::Max([int]$env:NUMBER_OF_PROCESSORS, 1)
-
-Measure-Command {
-  cargo run --release --manifest-path "$root\framescript_benchmark\render\Cargo.toml" -- `
-    1920:1080:60:3600:$workers:H264:ultrafast
-} | Select-Object TotalSeconds
+# 10s sample
+.\scripts\render_framescript_default_10s.ps1
 ```
 
-The renderer prints `TOTAL : <ms>` when complete; use that value if preferred.
+## Revideo
+
+PowerShell:
+
+```powershell
+# 120s default
+.\scripts\render_revideo_default.ps1
+
+# 10s sample
+.\scripts\render_revideo_default_10s.ps1
+```
+

@@ -19,7 +19,7 @@ export const PROJECT_SETTINGS: ProjectSettings = {
   fps: 60,
 }
 
-const TOTAL_SECONDS = 60
+const TOTAL_SECONDS = 120
 const CYCLE_SECONDS = 2
 const CYCLES = TOTAL_SECONDS / CYCLE_SECONDS
 const MAX_X = 600
@@ -110,3 +110,7 @@ export const PROJECT = () => {
     </Project>
   )
 }
+
+
+
+
